@@ -7,6 +7,7 @@ import u05lab.ex1.List
 enum List[A]:
   case ::(h: A, t: List[A])
   case Nil()
+
   def ::(h: A): List[A] = List.::(h, this)
 
   def head: Option[A] = this match
@@ -59,16 +60,67 @@ enum List[A]:
   def reverse(): List[A] = foldLeft[List[A]](Nil())((l, e) => e :: l)
 
   /** EXERCISES */
-  def zipRight: List[(A, Int)] = ???
 
-  def partition(pred: A => Boolean): (List[A], List[A]) = ???
+  def zipRight: List[(A, Int)] =
+    reverse()
+      .foldRight[List[(A, Int)]](Nil())((a, b) => (a, b.length) :: b)
+      .reverse()
 
-  def span(pred: A => Boolean): (List[A], List[A]) = ???
+  def zipRightRec: List[(A, Int)] =
+    def _zipRightRec(list: List[A])(pos: Int): List[(A, Int)] = list match
+      case h :: t => (h, pos) :: _zipRightRec(t)(pos + 1)
+      case _ => Nil()
+
+    _zipRightRec(this)(0)
+
+  def partition(pred: A => Boolean): (List[A], List[A]) = (this.filter(pred), this.filter(!pred(_)))
+
+  def partition2(pred: A => Boolean): (List[A], List[A]) =
+    foldLeft((Nil[A](), Nil()))((b, a) => pred(a) match
+      case true => (updateListReverse(b._1, a), b._2)
+      case false => (b._1, updateListReverse(b._2, a))
+    )
+
+  def partitionRec(pred: A => Boolean): (List[A], List[A]) = this match
+    case h :: t =>
+      val rec = t.partitionRec(pred)
+      pred(h) match
+        case true => (h :: rec._1, rec._2)
+        case false => (rec._1, h :: rec._2)
+    case _ => (Nil(), Nil())
+
+  def span(pred: A => Boolean): (List[A], List[A]) =
+    foldLeft(((Nil[A](), Nil[A]()), true))((b, a) => b._2 && pred(a) match
+      case true => ((updateListReverse(b._1._1, a), b._1._2), true)
+      case false => ((b._1._1, updateListReverse(b._1._2, a)), false)
+    )._1
+
+  def spanRec(pred: A => Boolean): (List[A], List[A]) = this match
+    case h :: t if pred(h) => val rec = t.spanRec(pred); (h :: rec._1, rec._2)
+    case _ => (Nil(), this)
+
 
   /** @throws UnsupportedOperationException if the list is empty */
-  def reduce(op: (A, A) => A): A = ???
+  def reduce(op: (A, A) => A): A = this match
+    case h :: t => t.foldRight(h)(op)
+    case _ => throw UnsupportedOperationException()
 
-  def takeRight(n: Int): List[A] = ???
+  def reduceRec(op: (A, A) => A): A = this match
+    case h :: Nil() => h
+    case h :: t => op(h, t.reduceRec(op))
+    case _ => throw UnsupportedOperationException()
+
+  def takeRight(n: Int): List[A] =
+    foldRight[List[A]](Nil())((a, b) => b.length match
+      case l if l == n => b
+      case _ => a :: b)
+
+  def takeRightRec(n: Int): List[A] = this match
+    case h :: t if length == n => h :: t.takeRightRec(n - 1)
+    case h :: t => t.takeRightRec(n)
+    case _ => Nil()
+
+  private def updateListReverse(list: List[A], elem: A): List[A] = (elem :: list.reverse()).reverse()
 
 // Factories
 object List:
