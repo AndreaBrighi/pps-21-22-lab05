@@ -120,6 +120,14 @@ enum List[A]:
     case h :: t => t.takeRightRec(n)
     case _ => Nil()
 
+  def collect[B](fun: PartialFunction[A, B]): List[B] = filter(fun.isDefinedAt).map(fun)
+
+  def collectRec[B](fun: PartialFunction[A, B]): List[B] = this match
+    case h :: t => fun.isDefinedAt(h) match
+      case true => fun(h) :: t.collectRec(fun)
+      case false => t.collectRec(fun)
+    case _ => Nil()
+
   private def updateListReverse(list: List[A], elem: A): List[A] = (elem :: list.reverse()).reverse()
 
 // Factories

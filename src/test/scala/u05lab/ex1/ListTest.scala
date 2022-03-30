@@ -42,4 +42,14 @@ class ListTest {
   def testTake(): Unit =
     assertEquals(List(2, 3, 4), list.takeRight(3))
 
+  @Test
+  def testCollect(): Unit =
+    val fun = new PartialFunction[Int, Int] {
+      def isDefinedAt(e: Int): Boolean = e % 2 == 0
+
+      def apply(e: Int): Int = e * 2
+
+    }
+    assertEquals(List(4, 8), list.collect(fun))
+
 }
