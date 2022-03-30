@@ -4,52 +4,44 @@ package u05lab.ex1
 import org.junit.Assert.{assertEquals, assertThrows}
 import org.junit.Test
 
-class ListTest {
+class ListTest extends AbstractListTest:
 
   import u05lab.ex1.List._
 
-  val list: List[Int] = List(1, 2, 3, 4)
-
   @Test
   def testZipRight(): Unit =
-    assertEquals(List((1, 0), (2, 1), (3, 2), (4, 3)), list.zipRight)
+    testZipRight(list.zipRight)
 
   @Test
   def testPartition(): Unit =
-    assertEquals((List(1, 3), List(2, 4)), list.partition(_ % 2 == 1))
+    testPartition(list.partition)
 
   @Test
   def testPartition2(): Unit =
-    assertEquals((List(1, 3), List(2, 4)), list.partition2(_ % 2 == 1))
+    testPartition(list.partition2)
 
   @Test
   def testSpan(): Unit =
-    assertEquals((List(1), List(2, 3, 4)), list.span(_ % 2 != 0))
+    testSpan(list.span)
 
   @Test
   def testSpan2(): Unit =
-    assertEquals((List(1, 2), List(3, 4)), list.span(_ < 3))
+    testSpan2(list.span)
 
   @Test
   def testReduce(): Unit =
-    assertEquals(10, list.reduce(_ + _))
+    testReduce(list.reduce)
 
   @Test
   def testReduceError(): Unit =
-    assertThrows(classOf[UnsupportedOperationException], () => Nil[Int]().reduce(_ + _))
+    testReduceError(Nil[Int]().reduce)
 
   @Test
   def testTake(): Unit =
-    assertEquals(List(2, 3, 4), list.takeRight(3))
+    testTake(list.takeRight)
 
   @Test
   def testCollect(): Unit =
-    val fun = new PartialFunction[Int, Int] {
-      def isDefinedAt(e: Int): Boolean = e % 2 == 0
+    testCollect(list.collect)
 
-      def apply(e: Int): Int = e * 2
 
-    }
-    assertEquals(List(4, 8), list.collect(fun))
-
-}

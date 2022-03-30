@@ -3,48 +3,38 @@ package u05lab.ex1
 import org.junit.Assert.{assertEquals, assertThrows}
 import org.junit.Test
 
-class ListRecursiveTest {
+class ListRecursiveTest extends AbstractListTest :
 
-    import u05lab.ex1.List.*
+  import u05lab.ex1.List._
 
-    val list: List[Int] = List(1, 2, 3, 4)
+  @Test
+  def testZipRight(): Unit =
+    testZipRight(list.zipRightRec)
 
-    @Test
-    def testZipRightRec(): Unit =
-      assertEquals(List((1, 0), (2, 1), (3, 2), (4, 3)), list.zipRightRec)
+  @Test
+  def testPartition(): Unit =
+    testPartition(list.partitionRec)
 
-    @Test
-    def testPartitionRec(): Unit =
-      assertEquals((List(1, 3), List(2, 4)), list.partitionRec(_ % 2 == 1))
+  @Test
+  def testSpan(): Unit =
+    testSpan(list.spanRec)
 
-    @Test
-    def testSpanRec(): Unit =
-      assertEquals((List(1), List(2, 3, 4)), list.spanRec(_ % 2 != 0))
+  @Test
+  def testSpan2(): Unit =
+    testSpan2(list.spanRec)
 
-    @Test
-    def testSpanRec2(): Unit =
-      assertEquals((List(1, 2), List(3, 4)), list.spanRec(_ < 3))
+  @Test
+  def testReduce(): Unit =
+    testReduce(list.reduceRec)
 
-    @Test
-    def testReduceRec(): Unit =
-      assertEquals(10, list.reduceRec(_ + _))
+  @Test
+  def testReduceError(): Unit =
+    testReduceError(Nil[Int]().reduceRec)
 
-    @Test
-    def testReduceRecError(): Unit =
-      assertThrows(classOf[UnsupportedOperationException], () => Nil[Int]().reduceRec(_ + _))
+  @Test
+  def testTake(): Unit =
+    testTake(list.takeRightRec)
 
-    @Test
-    def testTakeRec(): Unit =
-      assertEquals(List(2, 3, 4), list.takeRightRec(3))
-
-    @Test
-    def testCollect(): Unit =
-      val fun = new PartialFunction[Int, Int] {
-        def isDefinedAt(e: Int): Boolean = e % 2 == 0
-
-        def apply(e: Int): Int = e * 2
-
-      }
-      assertEquals(List(4, 8), list.collectRec(fun))
-
-  }
+  @Test
+  def testCollect(): Unit =
+    testCollect(list.collectRec)
