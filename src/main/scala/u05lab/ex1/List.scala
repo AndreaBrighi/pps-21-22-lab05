@@ -62,9 +62,8 @@ enum List[A]:
   /** EXERCISES */
 
   def zipRight: List[(A, Int)] =
-    reverse()
-      .foldRight[List[(A, Int)]](Nil())((a, b) => (a, b.length) :: b)
-      .reverse()
+    val size = length - 1
+    foldRight[List[(A, Int)]](Nil())((a, b) => (a, size - b.length) :: b)
 
   def zipRightRec: List[(A, Int)] =
     def _zipRightRec(list: List[A])(pos: Int): List[(A, Int)] = list match
@@ -76,9 +75,9 @@ enum List[A]:
   def partition(pred: A => Boolean): (List[A], List[A]) = (this.filter(pred), this.filter(!pred(_)))
 
   def partition2(pred: A => Boolean): (List[A], List[A]) =
-    foldLeft((Nil[A](), Nil()))((b, a) => pred(a) match
-      case true => (updateListReverse(b._1, a), b._2)
-      case false => (b._1, updateListReverse(b._2, a))
+    foldRight((Nil[A](), Nil()))((a, b) => pred(a) match
+      case true => (a :: b._1, b._2)
+      case false => (b._1, a :: b._2)
     )
 
   def partitionRec(pred: A => Boolean): (List[A], List[A]) = this match
@@ -90,10 +89,10 @@ enum List[A]:
     case _ => (Nil(), Nil())
 
   def span(pred: A => Boolean): (List[A], List[A]) =
-    foldLeft(((Nil[A](), Nil[A]()), true))((b, a) => b._2 && pred(a) match
-      case true => ((updateListReverse(b._1._1, a), b._1._2), true)
-      case false => ((b._1._1, updateListReverse(b._1._2, a)), false)
-    )._1
+    foldRight((Nil[A](), Nil[A]()))((a, b) => pred(a) match
+      case true => (a :: b._1, b._2)
+      case false => (Nil(), a :: b._1.append(b._2))
+    )
 
   def spanRec(pred: A => Boolean): (List[A], List[A]) = this match
     case h :: t if pred(h) => val rec = t.spanRec(pred); (h :: rec._1, rec._2)
@@ -111,9 +110,7 @@ enum List[A]:
     case _ => throw UnsupportedOperationException()
 
   def takeRight(n: Int): List[A] =
-    foldRight[List[A]](Nil())((a, b) => b.length match
-      case l if l == n => b
-      case _ => a :: b)
+    foldRight[List[A]](Nil())((a, b) => if b.length == n then b else a :: b)
 
   def takeRightRec(n: Int): List[A] = this match
     case h :: t if length == n => h :: t.takeRightRec(n - 1)
@@ -127,8 +124,6 @@ enum List[A]:
       case true => fun(h) :: t.collectRec(fun)
       case false => t.collectRec(fun)
     case _ => Nil()
-
-  private def updateListReverse(list: List[A], elem: A): List[A] = (elem :: list.reverse()).reverse()
 
 // Factories
 object List:

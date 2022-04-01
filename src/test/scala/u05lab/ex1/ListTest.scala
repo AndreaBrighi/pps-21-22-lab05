@@ -4,9 +4,14 @@ package u05lab.ex1
 import org.junit.Assert.{assertEquals, assertThrows}
 import org.junit.Test
 
-class ListTest extends AbstractListTest:
+class ListTest extends AbstractListTest :
 
   import u05lab.ex1.List._
+
+  @Test
+  def testZipRightUnordered(): Unit =
+    val list: List[Int] = List(6, 3, 5, 1)
+    assertEquals(List((6, 0), (3, 1), (5, 2), (1, 3)), list.zipRight)
 
   @Test
   def testZipRight(): Unit =
