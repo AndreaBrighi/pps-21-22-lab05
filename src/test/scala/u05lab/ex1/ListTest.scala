@@ -18,6 +18,10 @@ class ListTest extends AbstractListTest :
     testZipRight(list.zipRight)
 
   @Test
+  def testZipRight2(): Unit =
+    testZipRight(list.zipRight2)
+
+  @Test
   def testPartition(): Unit =
     testPartition(list.partition)
 

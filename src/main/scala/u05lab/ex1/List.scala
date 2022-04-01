@@ -61,6 +61,13 @@ enum List[A]:
 
   /** EXERCISES */
 
+  def foldLR[B, C, D](lz: C, lf: C => C)(z: B, f: (A, C, B) => B): B = this match
+    case h :: t => f(h, lz, t.foldLR(lf(lz), lf)(z, f))
+    case _ => z
+
+  def zipRight2: List[(A, Int)] =
+    foldLR(0, _ + 1)(Nil(), (a, step, b) => (a, step) :: b)
+
   def zipRight: List[(A, Int)] =
     val size = length - 1
     foldRight[List[(A, Int)]](Nil())((a, b) => (a, size - b.length) :: b)
