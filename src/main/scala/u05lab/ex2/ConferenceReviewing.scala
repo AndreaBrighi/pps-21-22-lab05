@@ -8,8 +8,6 @@ enum Question:
 
 class ConferenceReviewing:
 
-  import scala.collection.mutable
-
   private var articles = Map[Int, List[Map[Question, Int]]]()
 
   /**
@@ -30,21 +28,23 @@ class ConferenceReviewing:
    * loads a review for the specified article, with the 4 explicit scores
    */
   def loadReview(article: Int, relevance: Int, significance: Int, confidence: Int, fin: Int): Unit =
-    articles = articles + (article -> (Map(Question.RELEVANCE -> relevance, Question.SIGNIFICANCE -> significance, Question.CONFIDENCE -> confidence, Question.FINAL -> fin) :: articles.getOrElse(article, List())))
+    articles = articles +
+      (article -> (Map(Question.RELEVANCE -> relevance, Question.SIGNIFICANCE -> significance, Question.CONFIDENCE -> confidence, Question.FINAL -> fin)
+        :: articles.getOrElse(article, List())))
 
   /**
    * @param article
    * @param question
    * @return the scores given to the specified article and specified question, as an (ascending-ordered) list
    */
-  def orderedScores(article: Int, question: Question): List[Int] = articles(article).flatMap(a => a.filter(q => q._1 == question).values).sorted
+  def orderedScores(article: Int, question: Question): List[Int] = articles(article).flatMap(_.filter(_._1 == question).values).sorted
 
   /**
    * @param article
    * @return the average score to question FINAL taken by the specified article
    */
   def averageFinalScore(article: Int): Double =
-    mean(articles(article).map(a => a(Question.FINAL)))
+    mean(articles(article).map(_(Question.FINAL)))
 
   /**
    * An article is considered accept if its averageFinalScore (not weighted) is > 5,
@@ -52,21 +52,25 @@ class ConferenceReviewing:
    *
    * @return the set of accepted articles
    */
-  def acceptedArticles: Set[Int] = articles
-    .filter(a => mean(a._2.map(q => q(Question.FINAL))) > 5 && a._2.map(q => q(Question.RELEVANCE)).exists(q => q >= 8))
+  def acceptedArticles: Set[Int] =
+    val averageThreshold = 5
+    val relevanceThreshold = 8
+    articles.filter(article => mean(article._2.map(_(Question.FINAL))) > averageThreshold && article._2.map(_(Question.RELEVANCE)).exists(_ >= relevanceThreshold))
     .keySet
 
 
   /**
    * @return accepted articles as a list of pairs article+averageFinalScore, ordered from worst to best based on averageFinalScore
    */
-  def sortedAcceptedArticles: List[(Int, Double)] = articles.filter(a => acceptedArticles.contains(a._1)).map(a => (a._1, averageFinalScore(a._1))).toList.sortWith(_._2 < _._2)
+  def sortedAcceptedArticles: List[(Int, Double)] = articles.filter(article => acceptedArticles.contains(article._1)).map(article => (article._1, averageFinalScore(article._1))).toList.sortWith(_._2 < _._2)
 
   /**
    * @return a map from articles to their average "weighted final score", namely,
    *         the average value of CONFIDENCE*FINAL/10
    *         Note: this method is optional in this exam
    */
-  def averageWeightedFinalScoreMap: Map[Int, Double] = articles.map(a => (a._1, mean(a._2.map(q => q(Question.CONFIDENCE) * q(Question.FINAL) / 10.0))))
+  def averageWeightedFinalScoreMap: Map[Int, Double] =
+    val maxConfidence = 10.0
+    articles.map(a => (a._1, mean(a._2.map(q => q(Question.CONFIDENCE) * q(Question.FINAL) / maxConfidence))))
 
   private def mean(list: List[Double]): Double = list.sum / list.size
